@@ -16,25 +16,23 @@ let cohorts = {};
 function generateRandomLogs(count) {
     const logs = [];
     for (let i = 0; i < count; i++) {
+        const hours = 5 + Math.random() * 4;
+        const quality = Math.floor(Math.random() * 5) + 5;
         logs.push({
             date: new Date(Date.now() - i * 86400000).toISOString().split('T')[0],
-            hours: 5 + Math.random() * 4,
-            quality: Math.floor(Math.random() * 5) + 5,
-            points: 0
+            hours: hours,
+            quality: quality,
+            points: calculatePoints(hours, quality)
         });
     }
-    // Calculate points for each log
-    logs.forEach(log => {
-        log.points = calculatePoints(log.hours, log.quality);
-    });
     return logs;
 }
 
-// Calculate points based on hours and quality
+// Calculate points based on hours only
 function calculatePoints(hours, quality) {
-    const hourPoints = Math.min(hours * 10, 80);
-    const qualityPoints = quality * 2;
-    return Math.round(hourPoints + qualityPoints);
+    // Points based only on hours of sleep
+    // 1 star per hour, capped at 10 stars for 10+ hours
+    return Math.min(Math.round(hours), 10);
 }
 
 // Add sleep log for current user

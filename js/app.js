@@ -40,7 +40,7 @@ function logSleep(e) {
     animatePointsEarned(log.points);
     
     // Show success message
-    showSuccessMessage();
+    showSuccessMessage(log.points);
     
     // Reset form
     e.target.reset();

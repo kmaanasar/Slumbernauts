@@ -57,7 +57,7 @@ function renderHistory() {
                 <div class="log-stats">
                     <span>⏰ ${log.hours} hrs</span>
                     <span>⭐ ${log.quality}/10</span>
-                    <span style="color: #ffd700;">✨ ${log.points} pts</span>
+                    <span style="color: #ffd700;">✨ ${log.points} stars</span>
                 </div>
             </div>
         `).join('');

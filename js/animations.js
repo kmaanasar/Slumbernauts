@@ -18,25 +18,25 @@ function initStars() {
 // Add stars animation when logging sleep
 function animatePointsEarned(points) {
     const starsContainer = document.getElementById('starsContainer');
-    const starCount = Math.floor(points / 5);
     
-    for (let i = 0; i < starCount; i++) {
+    for (let i = 0; i < points; i++) {
         setTimeout(() => {
             const star = document.createElement('div');
             star.className = 'star';
-            star.style.width = '4px';
-            star.style.height = '4px';
+            star.style.width = '5px';
+            star.style.height = '5px';
             star.style.left = Math.random() * 100 + '%';
             star.style.top = Math.random() * 100 + '%';
             star.style.animation = 'twinkle 1s ease-in-out';
             starsContainer.appendChild(star);
-        }, i * 50);
+        }, i * 100);
     }
 }
 
 // Show success message
-function showSuccessMessage() {
+function showSuccessMessage(points) {
     const message = document.getElementById('successMessage');
+    document.getElementById('starsEarned').textContent = points;
     message.classList.remove('hidden');
     setTimeout(() => {
         message.classList.add('hidden');
