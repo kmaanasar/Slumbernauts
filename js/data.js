@@ -15,6 +15,7 @@ async function addSleepLog(date, hours, quality) {
     
     try {
         await db.collection('sleepLogs').add(log);
+        console.log('Sleep log added successfully');
         return log;
     } catch (error) {
         console.error('Error adding sleep log:', error);
@@ -23,21 +24,66 @@ async function addSleepLog(date, hours, quality) {
     }
 }
 
+// Delete sleep log from Firebase
+async function deleteSleepLog(logId) {
+    try {
+        console.log('Deleting log:', logId);
+        await db.collection('sleepLogs').doc(logId).delete();
+        console.log('Log deleted successfully');
+        return true;
+    } catch (error) {
+        console.error('Error deleting sleep log:', error);
+        alert('Failed to delete sleep log. Please try again.');
+        return false;
+    }
+}
+
 // Get current user's sleep logs
 async function getCurrentUserLogs() {
     try {
+        console.log('Fetching logs for user:', currentUserId);
+        
+        // First try with ordering by date
         const snapshot = await db.collection('sleepLogs')
             .where('userId', '==', currentUserId)
             .orderBy('date', 'desc')
+            .limit(50)
             .get();
         
-        return snapshot.docs.map(doc => ({
+        const logs = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         }));
+        
+        console.log('Fetched logs (ordered by date):', logs.length, 'entries');
+        return logs;
     } catch (error) {
-        console.error('Error fetching logs:', error);
-        return [];
+        console.error('Error fetching logs with orderBy date:', error);
+        
+        // Fallback: try without ordering
+        try {
+            console.log('Trying fallback query without orderBy...');
+            const snapshot = await db.collection('sleepLogs')
+                .where('userId', '==', currentUserId)
+                .get();
+            
+            const logs = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            
+            // Sort manually by date
+            logs.sort((a, b) => {
+                if (!a.date || !b.date) return 0;
+                return new Date(b.date) - new Date(a.date);
+            });
+            
+            console.log('Fetched logs (fallback, manually sorted):', logs.length, 'entries');
+            return logs;
+        } catch (fallbackError) {
+            console.error('Fallback also failed:', fallbackError);
+            return [];
+        }
     }
 }
 
@@ -50,18 +96,23 @@ function calculatePoints(hours, quality) {
 async function getUserStats() {
     const logs = await getCurrentUserLogs();
     
+    console.log('Computing stats from', logs.length, 'logs');
+    
     if (logs.length === 0) {
-        return { totalPoints: 0, avgHours: 0, totalNights: 0 };
+        return { totalPoints: 0, avgHours: '0.0', totalNights: 0 };
     }
     
-    const totalPoints = logs.reduce((sum, log) => sum + log.points, 0);
-    const totalHours = logs.reduce((sum, log) => sum + log.hours, 0);
+    const totalPoints = logs.reduce((sum, log) => sum + (log.points || 0), 0);
+    const totalHours = logs.reduce((sum, log) => sum + (log.hours || 0), 0);
     
-    return {
+    const stats = {
         totalPoints: totalPoints,
         avgHours: (totalHours / logs.length).toFixed(1),
         totalNights: logs.length
     };
+    
+    console.log('Computed stats:', stats);
+    return stats;
 }
 
 // Create new cohort
