@@ -7,26 +7,50 @@ function updateQuality(value) {
 
 // Render user history
 async function renderHistory() {
-    const stats = await getUserStats();
-    document.getElementById('totalPoints').textContent = stats.totalPoints;
-    document.getElementById('avgHours').textContent = stats.avgHours;
-    document.getElementById('totalNights').textContent = stats.totalNights;
-    
-    const myLogs = await getCurrentUserLogs();
-    
-    const historyHTML = myLogs.map(log => `
-        <div class="log-entry">
-            <div class="log-date">${log.date}</div>
-            <div class="log-stats">
-                <span>⏰ ${log.hours} hrs</span>
-                <span>⭐ ${log.quality}/10</span>
-                <span style="color: #ffd700;">✨ ${log.points} stars</span>
+    try {
+        // Show loading state
+        document.getElementById('sleepHistory').innerHTML = '<p style="text-align: center;">Loading...</p>';
+        
+        // Fetch stats
+        const stats = await getUserStats();
+        console.log('Stats:', stats); // Debug log
+        
+        document.getElementById('totalPoints').textContent = stats.totalPoints;
+        document.getElementById('avgHours').textContent = stats.avgHours;
+        document.getElementById('totalNights').textContent = stats.totalNights;
+        
+        // Fetch logs
+        const myLogs = await getCurrentUserLogs();
+        console.log('My logs:', myLogs); // Debug log
+        
+        if (myLogs.length === 0) {
+            document.getElementById('sleepHistory').innerHTML = 
+                '<p style="text-align: center; opacity: 0.6;">No sleep logs yet. Start tracking your sleep!</p>';
+            return;
+        }
+        
+        const historyHTML = myLogs.map(log => `
+            <div class="log-entry">
+                <div>
+                    <div class="log-date">${log.date || 'No date'}</div>
+                    <div class="log-stats">
+                        <span>⏰ ${log.hours || 0} hrs</span>
+                        <span>⭐ ${log.quality || 0}/10</span>
+                        <span style="color: #ffd700;">✨ ${log.points || 0} stars</span>
+                    </div>
+                </div>
+                <button class="delete-btn" onclick="handleDeleteLog('${log.id}')" title="Delete entry">
+                    🗑️
+                </button>
             </div>
-        </div>
-    `).join('');
-    
-    document.getElementById('sleepHistory').innerHTML = historyHTML || 
-        '<p style="text-align: center; opacity: 0.6;">No sleep logs yet. Start tracking your sleep!</p>';
+        `).join('');
+        
+        document.getElementById('sleepHistory').innerHTML = historyHTML;
+    } catch (error) {
+        console.error('Error rendering history:', error);
+        document.getElementById('sleepHistory').innerHTML = 
+            '<p style="text-align: center; color: #ff6b6b;">Error loading history. Check console for details.</p>';
+    }
 }
 
 // Show cohort code after creation
@@ -66,7 +90,7 @@ async function renderCohortLeaderboards() {
     document.getElementById('cohortPointsLeaderboard').innerHTML = pointsHTML ||
         '<p style="text-align: center; opacity: 0.6;">No data yet. Start logging sleep!</p>';
     
-    // Render Hours Leaderboard
+// Render Hours Leaderboard
     const hoursLeaderboard = await getCohortHoursLeaderboard(cohort.code);
     const hoursHTML = hoursLeaderboard.map((user, idx) => `
         <div class="leaderboard-entry ${idx === 0 ? 'first' : ''}">

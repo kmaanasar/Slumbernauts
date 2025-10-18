@@ -56,6 +56,11 @@ async function logSleep(e) {
         e.target.reset();
         document.getElementById('sleepDate').valueAsDate = new Date();
         updateQuality(5);
+        
+        // Refresh history if user is on history view
+        if (!document.getElementById('historyView').classList.contains('hidden')) {
+            await renderHistory();
+        }
     }
     
     // Re-enable submit button
@@ -93,6 +98,26 @@ async function joinCohort() {
         await renderCohortLeaderboards();
     } else {
         alert('Invalid cohort code');
+    }
+}
+
+// Handle delete log
+async function handleDeleteLog(logId) {
+    if (!confirm('Are you sure you want to delete this sleep log?')) {
+        return;
+    }
+    
+    const success = await deleteSleepLog(logId);
+    
+    if (success) {
+        // Refresh history view
+        await renderHistory();
+        
+        // Also refresh cohort leaderboards if user is in a cohort
+        const cohort = await getUserCohort();
+        if (cohort && !document.getElementById('cohortsView').classList.contains('hidden')) {
+            await renderCohortLeaderboards();
+        }
     }
 }
 

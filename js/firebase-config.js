@@ -1,36 +1,260 @@
-// Firebase Configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyBSCIB9EQaCP3JAyKuvQVhhg08Yo8XIRJ0",
-  authDomain: "slumbernaut-478f7.firebaseapp.com",
-  projectId: "slumbernaut-478f7",
-  storageBucket: "slumbernaut-478f7.firebasestorage.app",
-  messagingSenderId: "144635906857",
-  appId: "1:144635906857:web:84a4aa5b29a4f622a48538"
-};
+// Data Management with Firebase
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-// Generate or retrieve user ID
-function getUserId() {
-    let userId = localStorage.getItem('sleepspace_user_id');
-    if (!userId) {
-        userId = 'user_' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('sleepspace_user_id', userId);
+// Save sleep log to Firebase
+async function addSleepLog(date, hours, quality) {
+    const points = calculatePoints(hours, quality);
+    const log = {
+        userId: currentUserId,
+        username: currentUsername,
+        date: date,
+        hours: hours,
+        quality: quality,
+        points: points,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    
+    try {
+        await db.collection('sleepLogs').add(log);
+        return log;
+    } catch (error) {
+        console.error('Error adding sleep log:', error);
+        alert('Failed to save sleep log. Please try again.');
+        return null;
     }
-    return userId;
 }
 
-// Get or create username
-function getUsername() {
-    let username = localStorage.getItem('sleepspace_username');
-    if (!username) {
-        username = prompt('Enter your username:') || 'Anonymous';
-        localStorage.setItem('sleepspace_username', username);
+// Delete sleep log from Firebase
+async function deleteSleepLog(logId) {
+    try {
+        await db.collection('sleepLogs').doc(logId).delete();
+        return true;
+    } catch (error) {
+        console.error('Error deleting sleep log:', error);
+        alert('Failed to delete sleep log. Please try again.');
+        return false;
     }
-    return username;
 }
 
-const currentUserId = getUserId();
-const currentUsername = getUsername();
+// Get current user's sleep logs
+async function getCurrentUserLogs() {
+    try {
+        const snapshot = await db.collection('sleepLogs')
+            .where('userId', '==', currentUserId)
+            .orderBy('timestamp', 'desc')
+            .limit(50) // Limit to last 50 entries
+            .get();
+        
+        const logs = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+        
+        console.log('Fetched logs:', logs); // Debug log
+        return logs;
+    } catch (error) {
+        console.error('Error fetching logs:', error);
+        
+        // Fallback: try without ordering if index doesn't exist
+        try {
+            const snapshot = await db.collection('sleepLogs')
+                .where('userId', '==', currentUserId)
+                .get();
+            
+            const logs = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            
+            // Sort manually by date
+            logs.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            console.log('Fetched logs (fallback):', logs);
+            return logs;
+        } catch (fallbackError) {
+            console.error('Fallback also failed:', fallbackError);
+            return [];
+        }
+    }
+}
+
+// Calculate points based on hours only
+function calculatePoints(hours, quality) {
+    return Math.min(Math.round(hours), 10);
+}
+
+// Get user statistics
+async function getUserStats() {
+    const logs = await getCurrentUserLogs();
+    
+    console.log('Computing stats from logs:', logs); // Debug log
+    
+    if (logs.length === 0) {
+        return { totalPoints: 0, avgHours: '0.0', totalNights: 0 };
+    }
+    
+    const totalPoints = logs.reduce((sum, log) => sum + (log.points || 0), 0);
+    const totalHours = logs.reduce((sum, log) => sum + (log.hours || 0), 0);
+    
+    return {
+        totalPoints: totalPoints,
+        avgHours: (totalHours / logs.length).toFixed(1),
+        totalNights: logs.length
+    };
+}
+
+// Create new cohort
+async function createNewCohort(name) {
+    const code = 'SPACE-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+    
+    try {
+        await db.collection('cohorts').doc(code).set({
+            name: name,
+            createdBy: currentUserId,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            members: [currentUserId]
+        });
+        
+        // Add user to cohort in their profile
+        await db.collection('userCohorts').doc(currentUserId).set({
+            cohortCode: code
+        }, { merge: true });
+        
+        return code;
+    } catch (error) {
+        console.error('Error creating cohort:', error);
+        alert('Failed to create cohort. Please try again.');
+        return null;
+    }
+}
+
+// Join existing cohort
+async function joinExistingCohort(code) {
+    try {
+        const cohortDoc = await db.collection('cohorts').doc(code).get();
+        
+        if (!cohortDoc.exists) {
+            return null;
+        }
+        
+        // Add user to cohort members
+        await db.collection('cohorts').doc(code).update({
+            members: firebase.firestore.FieldValue.arrayUnion(currentUserId)
+        });
+        
+        // Save cohort to user profile
+        await db.collection('userCohorts').doc(currentUserId).set({
+            cohortCode: code
+        }, { merge: true });
+        
+        return cohortDoc.data();
+    } catch (error) {
+        console.error('Error joining cohort:', error);
+        return null;
+    }
+}
+
+// Get cohort points leaderboard
+async function getCohortLeaderboard(cohortCode) {
+    try {
+        const cohortDoc = await db.collection('cohorts').doc(cohortCode).get();
+        
+        if (!cohortDoc.exists) {
+            return [];
+        }
+        
+        const members = cohortDoc.data().members;
+        
+        // Get all logs for cohort members
+        const logsSnapshot = await db.collection('sleepLogs')
+            .where('userId', 'in', members)
+            .get();
+        
+        const userPoints = {};
+        
+        logsSnapshot.docs.forEach(doc => {
+            const data = doc.data();
+            if (!userPoints[data.userId]) {
+                userPoints[data.userId] = {
+                    username: data.username,
+                    points: 0
+                };
+            }
+            userPoints[data.userId].points += data.points;
+        });
+        
+        return Object.values(userPoints)
+            .sort((a, b) => b.points - a.points);
+    } catch (error) {
+        console.error('Error fetching cohort leaderboard:', error);
+        return [];
+    }
+}
+
+// Get cohort average hours leaderboard
+async function getCohortHoursLeaderboard(cohortCode) {
+    try {
+        const cohortDoc = await db.collection('cohorts').doc(cohortCode).get();
+        
+        if (!cohortDoc.exists) {
+            return [];
+        }
+        
+        const members = cohortDoc.data().members;
+        
+        // Get all logs for cohort members
+        const logsSnapshot = await db.collection('sleepLogs')
+            .where('userId', 'in', members)
+            .get();
+        
+        const userHours = {};
+        
+        logsSnapshot.docs.forEach(doc => {
+            const data = doc.data();
+            if (!userHours[data.userId]) {
+                userHours[data.userId] = {
+                    username: data.username,
+                    totalHours: 0,
+                    count: 0
+                };
+            }
+            userHours[data.userId].totalHours += data.hours;
+            userHours[data.userId].count += 1;
+        });
+        
+        return Object.entries(userHours)
+            .map(([userId, data]) => ({
+                username: data.username,
+                avgHours: (data.totalHours / data.count).toFixed(1)
+            }))
+            .sort((a, b) => b.avgHours - a.avgHours);
+    } catch (error) {
+        console.error('Error fetching cohort hours leaderboard:', error);
+        return [];
+    }
+}
+
+// Get user's cohort
+async function getUserCohort() {
+    try {
+        const userCohortDoc = await db.collection('userCohorts').doc(currentUserId).get();
+        
+        if (!userCohortDoc.exists) {
+            return null;
+        }
+        
+        const cohortCode = userCohortDoc.data().cohortCode;
+        const cohortDoc = await db.collection('cohorts').doc(cohortCode).get();
+        
+        if (!cohortDoc.exists) {
+            return null;
+        }
+        
+        return {
+            code: cohortCode,
+            ...cohortDoc.data()
+        };
+    } catch (error) {
+        console.error('Error fetching user cohort:', error);
+        return null;
+    }
+}
