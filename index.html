@@ -17,7 +17,6 @@
 
         <nav>
             <button class="nav-btn active" onclick="showView('log')">Log Sleep</button>
-            <button class="nav-btn" onclick="showView('leaderboard')">Leaderboard</button>
             <button class="nav-btn" onclick="showView('cohorts')">Cohorts</button>
             <button class="nav-btn" onclick="showView('history')">My History</button>
         </nav>
@@ -49,18 +48,6 @@
             </div>
         </div>
 
-        <!-- Leaderboard View -->
-        <div id="leaderboardView" class="view hidden">
-            <div class="card">
-                <h2>🏆 Global Leaderboard - Total Stars</h2>
-                <div class="leaderboard" id="pointsLeaderboard"></div>
-            </div>
-            <div class="card">
-                <h2>💤 Average Sleep Hours</h2>
-                <div class="leaderboard" id="hoursLeaderboard"></div>
-            </div>
-        </div>
-
         <!-- Cohorts View -->
         <div id="cohortsView" class="view hidden">
             <div class="cohort-section">
@@ -85,9 +72,26 @@
                     <button onclick="joinCohort()">Join Cohort</button>
                 </div>
             </div>
-            <div class="card" id="myCohort" class="hidden">
-                <h2>👥 My Cohort</h2>
-                <div class="leaderboard" id="cohortLeaderboard"></div>
+            
+            <!-- My Cohort Section with Leaderboards -->
+            <div class="card" id="myCohort">
+                <h2 id="cohortTitle">👥 My Cohort</h2>
+                
+                <!-- Total Stars Leaderboard -->
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: #4facfe; margin-bottom: 15px;">🏆 Total Stars</h3>
+                    <div class="leaderboard" id="cohortPointsLeaderboard">
+                        <p style="text-align: center; opacity: 0.6;">Join a cohort to see rankings</p>
+                    </div>
+                </div>
+                
+                <!-- Average Hours Leaderboard -->
+                <div>
+                    <h3 style="color: #4facfe; margin-bottom: 15px;">💤 Average Sleep Hours</h3>
+                    <div class="leaderboard" id="cohortHoursLeaderboard">
+                        <p style="text-align: center; opacity: 0.6;">Join a cohort to see rankings</p>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -124,10 +128,5 @@
     <script src="js/animations.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/app.js"></script>
-    
-    <script>
-        // Display username
-        document.getElementById('currentUser').textContent = currentUsername;
-    </script>
 </body>
 </html>

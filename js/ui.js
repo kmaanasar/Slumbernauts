@@ -5,48 +5,6 @@ function updateQuality(value) {
     document.getElementById('qualityDisplay').textContent = value + ' ⭐';
 }
 
-// Render leaderboards
-async function renderLeaderboards() {
-    await renderPointsLeaderboard();
-    await renderHoursLeaderboard();
-}
-
-// Render points leaderboard
-async function renderPointsLeaderboard() {
-    const pointsBoard = await getPointsLeaderboard();
-    
-    const html = pointsBoard.map((user, idx) => `
-        <div class="leaderboard-entry ${idx === 0 ? 'first' : ''}">
-            <div style="display: flex; align-items: center;">
-                <span class="rank">#${idx + 1}</span>
-                <span>${user.username}</span>
-            </div>
-            <span class="points-display">${user.points} ⭐</span>
-        </div>
-    `).join('');
-    
-    document.getElementById('pointsLeaderboard').innerHTML = html || 
-        '<p style="text-align: center; opacity: 0.6;">No data yet</p>';
-}
-
-// Render hours leaderboard
-async function renderHoursLeaderboard() {
-    const hoursBoard = await getHoursLeaderboard();
-    
-    const html = hoursBoard.map((user, idx) => `
-        <div class="leaderboard-entry ${idx === 0 ? 'first' : ''}">
-            <div style="display: flex; align-items: center;">
-                <span class="rank">#${idx + 1}</span>
-                <span>${user.username}</span>
-            </div>
-            <span class="points-display">${user.avgHours} hrs</span>
-        </div>
-    `).join('');
-    
-    document.getElementById('hoursLeaderboard').innerHTML = html ||
-        '<p style="text-align: center; opacity: 0.6;">No data yet</p>';
-}
-
 // Render user history
 async function renderHistory() {
     const stats = await getUserStats();
@@ -77,21 +35,25 @@ function displayCohortCode(code) {
     document.getElementById('cohortCode').classList.remove('hidden');
 }
 
-// Render cohort leaderboard
-async function renderCohortLeaderboard() {
+// Render cohort leaderboards (both points and hours)
+async function renderCohortLeaderboards() {
     const cohort = await getUserCohort();
     
     if (!cohort) {
-        document.getElementById('myCohort').classList.add('hidden');
+        document.getElementById('myCohort').style.display = 'block';
+        document.getElementById('cohortTitle').textContent = '👥 Join or Create a Cohort';
+        document.getElementById('cohortPointsLeaderboard').innerHTML = 
+            '<p style="text-align: center; opacity: 0.6;">Join a cohort to compete with friends!</p>';
+        document.getElementById('cohortHoursLeaderboard').innerHTML = 
+            '<p style="text-align: center; opacity: 0.6;">Join a cohort to compete with friends!</p>';
         return;
     }
     
-    document.getElementById('myCohort').classList.remove('hidden');
-    document.querySelector('#myCohort h2').textContent = `👥 ${cohort.name}`;
+    document.getElementById('cohortTitle').textContent = `👥 ${cohort.name}`;
     
-    const leaderboard = await getCohortLeaderboard(cohort.code);
-    
-    const html = leaderboard.map((user, idx) => `
+    // Render Points Leaderboard
+    const pointsLeaderboard = await getCohortLeaderboard(cohort.code);
+    const pointsHTML = pointsLeaderboard.map((user, idx) => `
         <div class="leaderboard-entry ${idx === 0 ? 'first' : ''}">
             <div style="display: flex; align-items: center;">
                 <span class="rank">#${idx + 1}</span>
@@ -101,6 +63,21 @@ async function renderCohortLeaderboard() {
         </div>
     `).join('');
     
-    document.getElementById('cohortLeaderboard').innerHTML = html ||
-        '<p style="text-align: center; opacity: 0.6;">No members yet</p>';
+    document.getElementById('cohortPointsLeaderboard').innerHTML = pointsHTML ||
+        '<p style="text-align: center; opacity: 0.6;">No data yet. Start logging sleep!</p>';
+    
+    // Render Hours Leaderboard
+    const hoursLeaderboard = await getCohortHoursLeaderboard(cohort.code);
+    const hoursHTML = hoursLeaderboard.map((user, idx) => `
+        <div class="leaderboard-entry ${idx === 0 ? 'first' : ''}">
+            <div style="display: flex; align-items: center;">
+                <span class="rank">#${idx + 1}</span>
+                <span>${user.username}</span>
+            </div>
+            <span class="points-display">${user.avgHours} hrs</span>
+        </div>
+    `).join('');
+    
+    document.getElementById('cohortHoursLeaderboard').innerHTML = hoursHTML ||
+        '<p style="text-align: center; opacity: 0.6;">No data yet. Start logging sleep!</p>';
 }

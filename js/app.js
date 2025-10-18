@@ -11,7 +11,6 @@ async function showView(viewName) {
     // View mapping
     const views = {
         'log': 'logView',
-        'leaderboard': 'leaderboardView',
         'cohorts': 'cohortsView',
         'history': 'historyView'
     };
@@ -21,17 +20,12 @@ async function showView(viewName) {
     event.target.classList.add('active');
     
     // Update data for specific views
-    if (viewName === 'leaderboard') {
-        document.getElementById('pointsLeaderboard').innerHTML = '<p style="text-align: center;">Loading...</p>';
-        document.getElementById('hoursLeaderboard').innerHTML = '<p style="text-align: center;">Loading...</p>';
-        await renderLeaderboards();
-    }
     if (viewName === 'history') {
         document.getElementById('sleepHistory').innerHTML = '<p style="text-align: center;">Loading...</p>';
         await renderHistory();
     }
     if (viewName === 'cohorts') {
-        await renderCohortLeaderboard();
+        await renderCohortLeaderboards();
     }
 }
 
@@ -80,7 +74,7 @@ async function createCohort() {
     const code = await createNewCohort(name);
     if (code) {
         displayCohortCode(code);
-        await renderCohortLeaderboard();
+        await renderCohortLeaderboards();
     }
 }
 
@@ -96,7 +90,7 @@ async function joinCohort() {
     
     if (cohort) {
         alert('Successfully joined ' + cohort.name + '!');
-        await renderCohortLeaderboard();
+        await renderCohortLeaderboards();
     } else {
         alert('Invalid cohort code');
     }
@@ -110,7 +104,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize stars
     initStars();
     
-    // Load initial data
-    renderLeaderboards();
-    renderCohortLeaderboard();
+    // Display username
+    document.getElementById('currentUser').textContent = currentUsername;
+    
+    // Load cohort data
+    renderCohortLeaderboards();
 });

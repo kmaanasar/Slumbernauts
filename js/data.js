@@ -46,64 +46,6 @@ function calculatePoints(hours, quality) {
     return Math.min(Math.round(hours), 10);
 }
 
-// Get points leaderboard
-async function getPointsLeaderboard() {
-    try {
-        const snapshot = await db.collection('sleepLogs').get();
-        const userPoints = {};
-        
-        snapshot.docs.forEach(doc => {
-            const data = doc.data();
-            if (!userPoints[data.userId]) {
-                userPoints[data.userId] = {
-                    username: data.username,
-                    points: 0
-                };
-            }
-            userPoints[data.userId].points += data.points;
-        });
-        
-        return Object.values(userPoints)
-            .sort((a, b) => b.points - a.points)
-            .slice(0, 10); // Top 10
-    } catch (error) {
-        console.error('Error fetching leaderboard:', error);
-        return [];
-    }
-}
-
-// Get average hours leaderboard
-async function getHoursLeaderboard() {
-    try {
-        const snapshot = await db.collection('sleepLogs').get();
-        const userHours = {};
-        
-        snapshot.docs.forEach(doc => {
-            const data = doc.data();
-            if (!userHours[data.userId]) {
-                userHours[data.userId] = {
-                    username: data.username,
-                    totalHours: 0,
-                    count: 0
-                };
-            }
-            userHours[data.userId].totalHours += data.hours;
-            userHours[data.userId].count += 1;
-        });
-        
-        return Object.entries(userHours)
-            .map(([userId, data]) => ({
-                username: data.username,
-                avgHours: (data.totalHours / data.count).toFixed(1)
-            }))
-            .sort((a, b) => b.avgHours - a.avgHours)
-            .slice(0, 10);
-    } catch (error) {
-        console.error('Error fetching hours leaderboard:', error);
-        return [];
-    }
-}
-
 // Get user statistics
 async function getUserStats() {
     const logs = await getCurrentUserLogs();
@@ -173,7 +115,7 @@ async function joinExistingCohort(code) {
     }
 }
 
-// Get cohort leaderboard
+// Get cohort points leaderboard
 async function getCohortLeaderboard(cohortCode) {
     try {
         const cohortDoc = await db.collection('cohorts').doc(cohortCode).get();
@@ -206,6 +148,49 @@ async function getCohortLeaderboard(cohortCode) {
             .sort((a, b) => b.points - a.points);
     } catch (error) {
         console.error('Error fetching cohort leaderboard:', error);
+        return [];
+    }
+}
+
+// Get cohort average hours leaderboard
+async function getCohortHoursLeaderboard(cohortCode) {
+    try {
+        const cohortDoc = await db.collection('cohorts').doc(cohortCode).get();
+        
+        if (!cohortDoc.exists) {
+            return [];
+        }
+        
+        const members = cohortDoc.data().members;
+        
+        // Get all logs for cohort members
+        const logsSnapshot = await db.collection('sleepLogs')
+            .where('userId', 'in', members)
+            .get();
+        
+        const userHours = {};
+        
+        logsSnapshot.docs.forEach(doc => {
+            const data = doc.data();
+            if (!userHours[data.userId]) {
+                userHours[data.userId] = {
+                    username: data.username,
+                    totalHours: 0,
+                    count: 0
+                };
+            }
+            userHours[data.userId].totalHours += data.hours;
+            userHours[data.userId].count += 1;
+        });
+        
+        return Object.entries(userHours)
+            .map(([userId, data]) => ({
+                username: data.username,
+                avgHours: (data.totalHours / data.count).toFixed(1)
+            }))
+            .sort((a, b) => b.avgHours - a.avgHours);
+    } catch (error) {
+        console.error('Error fetching cohort hours leaderboard:', error);
         return [];
     }
 }
