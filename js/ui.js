@@ -73,7 +73,19 @@ async function renderCohortLeaderboards() {
         return;
     }
     
-    document.getElementById('cohortTitle').textContent = `👥 ${cohort.name}`;
+    // Display cohort name WITH access code
+    document.getElementById('cohortTitle').innerHTML = `
+        👥 ${cohort.name} 
+        <span style="
+            color: #4facfe; 
+            font-family: monospace; 
+            margin-left: 15px; 
+            padding: 5px 15px; 
+            background: rgba(79, 172, 254, 0.2); 
+            border-radius: 10px; 
+            font-size: 0.8em;
+        ">Code: ${cohort.code}</span>
+    `;
     
     // Render Points Leaderboard
     const pointsLeaderboard = await getCohortLeaderboard(cohort.code);
@@ -90,7 +102,7 @@ async function renderCohortLeaderboards() {
     document.getElementById('cohortPointsLeaderboard').innerHTML = pointsHTML ||
         '<p style="text-align: center; opacity: 0.6;">No data yet. Start logging sleep!</p>';
     
-// Render Hours Leaderboard
+    // Render Hours Leaderboard
     const hoursLeaderboard = await getCohortHoursLeaderboard(cohort.code);
     const hoursHTML = hoursLeaderboard.map((user, idx) => `
         <div class="leaderboard-entry ${idx === 0 ? 'first' : ''}">
