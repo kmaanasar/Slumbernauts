@@ -1,7 +1,7 @@
 // Main Application Logic
 
 // Show different views
-function showView(viewName) {
+async function showView(viewName) {
     // Hide all views
     document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
     
@@ -21,53 +21,82 @@ function showView(viewName) {
     event.target.classList.add('active');
     
     // Update data for specific views
-    if (viewName === 'leaderboard') renderLeaderboards();
-    if (viewName === 'history') renderHistory();
+    if (viewName === 'leaderboard') {
+        document.getElementById('pointsLeaderboard').innerHTML = '<p style="text-align: center;">Loading...</p>';
+        document.getElementById('hoursLeaderboard').innerHTML = '<p style="text-align: center;">Loading...</p>';
+        await renderLeaderboards();
+    }
+    if (viewName === 'history') {
+        document.getElementById('sleepHistory').innerHTML = '<p style="text-align: center;">Loading...</p>';
+        await renderHistory();
+    }
+    if (viewName === 'cohorts') {
+        await renderCohortLeaderboard();
+    }
 }
 
 // Handle sleep log form submission
-function logSleep(e) {
+async function logSleep(e) {
     e.preventDefault();
     
     const date = document.getElementById('sleepDate').value;
     const hours = parseFloat(document.getElementById('sleepHours').value);
     const quality = parseInt(document.getElementById('sleepQuality').value);
     
-    // Add log to data
-    const log = addSleepLog(date, hours, quality);
+    // Disable submit button
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving...';
     
-    // Animate stars
-    animatePointsEarned(log.points);
+    // Add log to Firebase
+    const log = await addSleepLog(date, hours, quality);
     
-    // Show success message
-    showSuccessMessage(log.points);
+    if (log) {
+        // Animate stars
+        animatePointsEarned(log.points);
+        
+        // Show success message
+        showSuccessMessage(log.points);
+        
+        // Reset form
+        e.target.reset();
+        document.getElementById('sleepDate').valueAsDate = new Date();
+        updateQuality(5);
+    }
     
-    // Reset form
-    e.target.reset();
-    document.getElementById('sleepDate').valueAsDate = new Date();
-    updateQuality(5);
+    // Re-enable submit button
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Log Sleep & Earn Stars ⭐';
 }
 
 // Create cohort
-function createCohort() {
+async function createCohort() {
     const name = document.getElementById('cohortName').value;
     if (!name) {
         alert('Please enter a cohort name');
         return;
     }
     
-    const code = createNewCohort(name);
-    displayCohortCode(code);
+    const code = await createNewCohort(name);
+    if (code) {
+        displayCohortCode(code);
+        await renderCohortLeaderboard();
+    }
 }
 
 // Join cohort
-function joinCohort() {
-    const code = document.getElementById('joinCode').value;
-    const cohort = joinExistingCohort(code);
+async function joinCohort() {
+    const code = document.getElementById('joinCode').value.toUpperCase();
+    if (!code) {
+        alert('Please enter a cohort code');
+        return;
+    }
+    
+    const cohort = await joinExistingCohort(code);
     
     if (cohort) {
         alert('Successfully joined ' + cohort.name + '!');
-        document.getElementById('myCohort').classList.remove('hidden');
+        await renderCohortLeaderboard();
     } else {
         alert('Invalid cohort code');
     }
@@ -81,6 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize stars
     initStars();
     
-    // Update initial leaderboards
+    // Load initial data
     renderLeaderboards();
+    renderCohortLeaderboard();
 });

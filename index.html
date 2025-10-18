@@ -26,6 +26,7 @@
         <div id="logView" class="view">
             <div class="card">
                 <h2>🌙 Log Your Sleep</h2>
+                <p style="opacity: 0.7; margin-bottom: 20px;">Logged in as: <strong id="currentUser"></strong></p>
                 <form onsubmit="logSleep(event)">
                     <div class="form-group">
                         <label>Date</label>
@@ -113,10 +114,20 @@
         </div>
     </div>
 
-    <!-- Scripts (load in correct order) -->
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- App Scripts (load in correct order) -->
+    <script src="js/firebase-config.js"></script>
     <script src="js/data.js"></script>
     <script src="js/animations.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/app.js"></script>
+    
+    <script>
+        // Display username
+        document.getElementById('currentUser').textContent = currentUsername;
+    </script>
 </body>
 </html>
