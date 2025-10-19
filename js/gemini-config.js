@@ -21,11 +21,13 @@ async function callGemini(prompt) {
 
         const data = await response.json();
         
+        console.log('Gemini Response:', data);
+        
         if (data.candidates && data.candidates[0]) {
             return data.candidates[0].content.parts[0].text;
         } else if (data.error) {
             console.error('Gemini API Error:', data.error);
-            throw new Error(data.error.message);
+            return `error: ${data.error.message}`;
         } else {
             throw new Error('no response from gemini');
         }
