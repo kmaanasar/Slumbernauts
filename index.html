@@ -26,6 +26,9 @@
             <button class="nav-btn" onclick="showView('history', this)" aria-label="View History">
                 📊 personal history
             </button>
+            <button class="nav-btn" onclick="showView('ai', this)" aria-label="AI Coach">
+                🤖 ai coach
+            </button>
         </nav>
     </header>
 
@@ -202,6 +205,64 @@
             </div>
         </div>
 
+        <!-- AI Coach View -->
+        <div id="aiView" class="view hidden" role="main">
+            <div class="card ai-card">
+                <h2>🤖 ai sleep coach</h2>
+                <p style="opacity: 0.8; margin-bottom: 20px;">
+                    get personalized insights powered by google gemini
+                </p>
+                
+                <button onclick="getAIAnalysis()" style="width: 100%; margin-bottom: 20px;">
+                    ✨ analyze my sleep patterns
+                </button>
+                
+                <div id="analysisResult" class="analysis-result hidden"></div>
+            </div>
+
+            <div class="card ai-card">
+                <h2>💬 chat with ai coach</h2>
+                <div id="chatMessages" class="chat-container">
+                    <p style="opacity: 0.6; text-align: center;">
+                        ask me anything about sleep! 🌙
+                    </p>
+                </div>
+                
+                <div class="chat-input-container">
+                    <input 
+                        type="text" 
+                        id="chatInput" 
+                        placeholder="e.g., how can i fall asleep faster?" 
+                        onkeypress="if(event.key==='Enter') sendChatMessage()"
+                    >
+                    <button onclick="sendChatMessage()">send</button>
+                </div>
+                
+                <div class="quick-actions">
+                    <button onclick="quickChat('why am i tired?')" class="quick-btn">
+                        😴 why am i tired?
+                    </button>
+                    <button onclick="quickChat('give me a sleep tip')" class="quick-btn">
+                        💡 sleep tip
+                    </button>
+                    <button onclick="quickChat('is my sleep healthy?')" class="quick-btn">
+                        ❤️ am i sleeping well?
+                    </button>
+                    <button onclick="quickChat('how to sleep better tonight')" class="quick-btn">
+                        🌙 sleep better tonight
+                    </button>
+                </div>
+            </div>
+
+            <div class="card ai-card">
+                <h2>💡 daily sleep tip</h2>
+                <button onclick="getDailyTip()" style="width: 100%; margin-bottom: 15px;">
+                    🎲 get random tip
+                </button>
+                <div id="dailyTip" class="ai-tip hidden"></div>
+            </div>
+        </div>
+
         <footer style="text-align: center; padding: 40px 20px; opacity: 0.5; font-size: 0.9em;">
             <p>Copyright © 2025 Slumbernauts</p>
         </footer>
@@ -255,6 +316,7 @@
     </script>
     
     <!-- App Scripts -->
+    <script src="js/gemini-config.js"></script>
     <script src="js/data.js"></script>
     <script src="js/animations.js"></script>
     <script src="js/ui.js"></script>
