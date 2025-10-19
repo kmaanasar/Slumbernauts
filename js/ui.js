@@ -65,7 +65,7 @@ async function renderCohortLeaderboards() {
     
     if (!cohort) {
         document.getElementById('myCohort').style.display = 'block';
-        document.getElementById('cohortTitle').textContent = '👥 Join or Create a Cohort';
+        document.getElementById('cohortTitle').textContent = '👥 Join or Create a Spaceship';
         document.getElementById('cohortPointsLeaderboard').innerHTML = 
             '<p style="text-align: center; opacity: 0.6;">Join a spaceship to compete with friends!</p>';
         document.getElementById('cohortHoursLeaderboard').innerHTML = 
