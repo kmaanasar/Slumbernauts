@@ -72,7 +72,7 @@ async function logSleep(e) {
 async function createCohort() {
     const name = document.getElementById('cohortName').value;
     if (!name) {
-        alert('Please enter a cohort name');
+        alert('Please enter a spaceship name');
         return;
     }
     
@@ -87,7 +87,7 @@ async function createCohort() {
 async function joinCohort() {
     const code = document.getElementById('joinCode').value.toUpperCase();
     if (!code) {
-        alert('Please enter a cohort code');
+        alert('Please enter a spaceship code'); 
         return;
     }
     
@@ -97,7 +97,7 @@ async function joinCohort() {
         alert('Successfully joined ' + cohort.name + '!');
         await renderCohortLeaderboards();
     } else {
-        alert('Invalid cohort code');
+        alert('Invalid spaceship code. Please try again.');
     }
 }
 
