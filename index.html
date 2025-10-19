@@ -8,21 +8,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Play:wght@400;700&display=swap" rel="stylesheet">
-    
-    <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
 </head>
 <body>
-    <!-- Animated Star Background -->
     <div class="stars" id="starsContainer" aria-hidden="true"></div>
     
-    <div class="container">
-        <!-- Header -->
-        <header>
-            <h1>🌙 slumbernauts</h1>
-        </header>
-
-        <!-- Navigation -->
+    <!-- Integrated Header + Nav Bar -->
+    <header>
+        <h1>🌙 slumbernauts</h1>
         <nav role="navigation">
             <button class="nav-btn active" onclick="showView('log', this)" aria-label="Log Sleep">
                 ⏰ sleeptime
@@ -34,7 +27,9 @@
                 📊 personal history
             </button>
         </nav>
+    </header>
 
+    <div class="container">
         <!-- Log Sleep View -->
         <div id="logView" class="view" role="main">
             <div class="card">
@@ -98,7 +93,6 @@
         <!-- Cohorts/Spaceships View -->
         <div id="cohortsView" class="view hidden" role="main">
             <div class="cohort-section">
-                <!-- Create Spaceship Card -->
                 <div class="card">
                     <h2>🚀 start new journey</h2>
 =======
@@ -141,7 +135,6 @@
                     </div>
                 </div>
                 
-                <!-- Join Spaceship Card -->
                 <div class="card">
                     <h2>join crew</h2>
                     <div class="form-group">
@@ -157,11 +150,9 @@
                 </div>
             </div>
             
-            <!-- My Spaceship Section with Leaderboards -->
             <div class="card" id="myCohort">
                 <h2 id="cohortTitle">my crew</h2>
                 
-                <!-- Total Stars Leaderboard -->
                 <div style="margin-bottom: 30px;">
                     <h3 style="color: #4facfe; margin-bottom: 15px;">
                         ⭐ total stars
@@ -173,7 +164,6 @@
                     </div>
                 </div>
                 
-                <!-- Average Hours Leaderboard -->
                 <div>
                     <h3 style="color: #4facfe; margin-bottom: 15px;">
                         💤 average sleep hours
@@ -189,7 +179,6 @@
 
         <!-- History View -->
         <div id="historyView" class="view hidden" role="main">
-            <!-- Stats Cards -->
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-value" id="totalPoints">0</div>
@@ -205,7 +194,6 @@
                 </div>
             </div>
             
-            <!-- Sleep History -->
             <div class="card">
                 <h2>📅 sleep history</h2>
                 <div class="sleep-log" id="sleepHistory">
@@ -216,7 +204,6 @@
             </div>
         </div>
 
-        <!-- Footer -->
         <footer style="text-align: center; padding: 40px 20px; opacity: 0.5; font-size: 0.9em;">
             <p>made with ✨ by slumbernauts</p>
         </footer>
