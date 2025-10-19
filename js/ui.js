@@ -1,27 +1,20 @@
-// UI Update Module
-
-// Update quality display
 function updateQuality(value) {
     document.getElementById('qualityDisplay').textContent = value + ' ⭐';
 }
 
-// Render user history
 async function renderHistory() {
     try {
-        // Show loading state
         document.getElementById('sleepHistory').innerHTML = '<p style="text-align: center;">Loading...</p>';
         
-        // Fetch stats
         const stats = await getUserStats();
-        console.log('Stats:', stats); // Debug log
+        console.log('Stats:', stats); 
         
         document.getElementById('totalPoints').textContent = stats.totalPoints;
         document.getElementById('avgHours').textContent = stats.avgHours;
         document.getElementById('totalNights').textContent = stats.totalNights;
-        
-        // Fetch logs
+ 
         const myLogs = await getCurrentUserLogs();
-        console.log('My logs:', myLogs); // Debug log
+        console.log('My logs:', myLogs); 
         
         if (myLogs.length === 0) {
             document.getElementById('sleepHistory').innerHTML = 
@@ -53,13 +46,11 @@ async function renderHistory() {
     }
 }
 
-// Show cohort code after creation
 function displayCohortCode(code) {
     document.getElementById('generatedCode').textContent = code;
     document.getElementById('cohortCode').classList.remove('hidden');
 }
 
-// Render cohort leaderboards (both points and hours)
 async function renderCohortLeaderboards() {
     const cohort = await getUserCohort();
     
@@ -73,7 +64,6 @@ async function renderCohortLeaderboards() {
         return;
     }
     
-    // Display cohort name WITH access code
     document.getElementById('cohortTitle').innerHTML = `
         👥 ${cohort.name} 
         <span style="
@@ -87,7 +77,6 @@ async function renderCohortLeaderboards() {
         ">Code: ${cohort.code}</span>
     `;
     
-    // Render Points Leaderboard
     const pointsLeaderboard = await getCohortLeaderboard(cohort.code);
     const pointsHTML = pointsLeaderboard.map((user, idx) => `
         <div class="leaderboard-entry ${idx === 0 ? 'first' : ''}">
@@ -102,7 +91,6 @@ async function renderCohortLeaderboards() {
     document.getElementById('cohortPointsLeaderboard').innerHTML = pointsHTML ||
         '<p style="text-align: center; opacity: 0.6;">No data yet. Start logging sleep!</p>';
     
-    // Render Hours Leaderboard
     const hoursLeaderboard = await getCohortHoursLeaderboard(cohort.code);
     const hoursHTML = hoursLeaderboard.map((user, idx) => `
         <div class="leaderboard-entry ${idx === 0 ? 'first' : ''}">

@@ -1,6 +1,3 @@
-// Animation Module
-
-// Initialize background stars
 function initStars() {
     const container = document.getElementById('starsContainer');
     for (let i = 0; i < 100; i++) {
@@ -15,7 +12,6 @@ function initStars() {
     }
 }
 
-// Add stars animation when logging sleep
 function animatePointsEarned(points) {
     const starsContainer = document.getElementById('starsContainer');
     
@@ -33,7 +29,6 @@ function animatePointsEarned(points) {
     }
 }
 
-// Show success message
 function showSuccessMessage(points) {
     const message = document.getElementById('successMessage');
     document.getElementById('starsEarned').textContent = points;

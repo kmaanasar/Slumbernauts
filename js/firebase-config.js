@@ -1,6 +1,3 @@
-// Data Management with Firebase
-
-// Save sleep log to Firebase
 async function addSleepLog(date, hours, quality) {
     const points = calculatePoints(hours, quality);
     const log = {
@@ -23,7 +20,6 @@ async function addSleepLog(date, hours, quality) {
     }
 }
 
-// Delete sleep log from Firebase
 async function deleteSleepLog(logId) {
     try {
         await db.collection('sleepLogs').doc(logId).delete();
@@ -35,13 +31,12 @@ async function deleteSleepLog(logId) {
     }
 }
 
-// Get current user's sleep logs
 async function getCurrentUserLogs() {
     try {
         const snapshot = await db.collection('sleepLogs')
             .where('userId', '==', currentUserId)
             .orderBy('timestamp', 'desc')
-            .limit(50) // Limit to last 50 entries
+            .limit(50)
             .get();
         
         const logs = snapshot.docs.map(doc => ({
@@ -49,12 +44,11 @@ async function getCurrentUserLogs() {
             ...doc.data()
         }));
         
-        console.log('Fetched logs:', logs); // Debug log
+        console.log('Fetched logs:', logs);
         return logs;
     } catch (error) {
         console.error('Error fetching logs:', error);
         
-        // Fallback: try without ordering if index doesn't exist
         try {
             const snapshot = await db.collection('sleepLogs')
                 .where('userId', '==', currentUserId)
@@ -65,7 +59,6 @@ async function getCurrentUserLogs() {
                 ...doc.data()
             }));
             
-            // Sort manually by date
             logs.sort((a, b) => new Date(b.date) - new Date(a.date));
             
             console.log('Fetched logs (fallback):', logs);
@@ -77,16 +70,14 @@ async function getCurrentUserLogs() {
     }
 }
 
-// Calculate points based on hours only
 function calculatePoints(hours, quality) {
     return Math.min(Math.round(hours), 10);
 }
 
-// Get user statistics
 async function getUserStats() {
     const logs = await getCurrentUserLogs();
     
-    console.log('Computing stats from logs:', logs); // Debug log
+    console.log('Computing stats from logs:', logs);
     
     if (logs.length === 0) {
         return { totalPoints: 0, avgHours: '0.0', totalNights: 0 };
@@ -102,7 +93,6 @@ async function getUserStats() {
     };
 }
 
-// Create new cohort
 async function createNewCohort(name) {
     const code = 'SPACE-' + Math.random().toString(36).substring(2, 6).toUpperCase();
     
@@ -114,7 +104,6 @@ async function createNewCohort(name) {
             members: [currentUserId]
         });
         
-        // Add user to cohort in their profile
         await db.collection('userCohorts').doc(currentUserId).set({
             cohortCode: code
         }, { merge: true });
@@ -127,7 +116,6 @@ async function createNewCohort(name) {
     }
 }
 
-// Join existing cohort
 async function joinExistingCohort(code) {
     try {
         const cohortDoc = await db.collection('cohorts').doc(code).get();
@@ -136,12 +124,10 @@ async function joinExistingCohort(code) {
             return null;
         }
         
-        // Add user to cohort members
         await db.collection('cohorts').doc(code).update({
             members: firebase.firestore.FieldValue.arrayUnion(currentUserId)
         });
         
-        // Save cohort to user profile
         await db.collection('userCohorts').doc(currentUserId).set({
             cohortCode: code
         }, { merge: true });
@@ -153,7 +139,6 @@ async function joinExistingCohort(code) {
     }
 }
 
-// Get cohort points leaderboard
 async function getCohortLeaderboard(cohortCode) {
     try {
         const cohortDoc = await db.collection('cohorts').doc(cohortCode).get();
@@ -164,7 +149,6 @@ async function getCohortLeaderboard(cohortCode) {
         
         const members = cohortDoc.data().members;
         
-        // Get all logs for cohort members
         const logsSnapshot = await db.collection('sleepLogs')
             .where('userId', 'in', members)
             .get();
@@ -190,7 +174,6 @@ async function getCohortLeaderboard(cohortCode) {
     }
 }
 
-// Get cohort average hours leaderboard
 async function getCohortHoursLeaderboard(cohortCode) {
     try {
         const cohortDoc = await db.collection('cohorts').doc(cohortCode).get();
@@ -201,7 +184,6 @@ async function getCohortHoursLeaderboard(cohortCode) {
         
         const members = cohortDoc.data().members;
         
-        // Get all logs for cohort members
         const logsSnapshot = await db.collection('sleepLogs')
             .where('userId', 'in', members)
             .get();
@@ -233,7 +215,6 @@ async function getCohortHoursLeaderboard(cohortCode) {
     }
 }
 
-// Get user's cohort
 async function getUserCohort() {
     try {
         const userCohortDoc = await db.collection('userCohorts').doc(currentUserId).get();
