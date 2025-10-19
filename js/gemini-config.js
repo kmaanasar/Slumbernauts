@@ -1,22 +1,16 @@
-// Gemini API Configuration
-const GEMINI_API_KEY = "AIzaSyBgZeZv56Kl8kW8xTG64Ar2QzQWffchyfM";
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+// Gemini API Configuration - Using Firebase Cloud Function
+// Replace YOUR-PROJECT-ID with your actual Firebase project ID
+const CLOUD_FUNCTION_URL = "https://us-central1-slumbernaut-478f7.cloudfunctions.net/callGemini";
 
-// Call Gemini API
+// Call Gemini API via Cloud Function
 async function callGemini(prompt) {
     try {
-        const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+        const response = await fetch(CLOUD_FUNCTION_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{
-                        text: prompt
-                    }]
-                }]
-            })
+            body: JSON.stringify({ prompt })
         });
 
         const data = await response.json();
@@ -33,7 +27,7 @@ async function callGemini(prompt) {
         }
     } catch (error) {
         console.error('gemini api error:', error);
-        return "sorry, i couldn't generate a response. please check your api key and try again. 🌙";
+        return "sorry, i couldn't generate a response. please check your connection and try again. 🌙";
     }
 }
 
