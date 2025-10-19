@@ -1,6 +1,6 @@
 // Gemini API Configuration
 const GEMINI_API_KEY = "AIzaSyBgZeZv56Kl8kW8xTG64Ar2QzQWffchyfM";
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 
 // Call Gemini API
 async function callGemini(prompt) {
