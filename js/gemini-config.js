@@ -1,5 +1,4 @@
 // Gemini API Configuration - Using Netlify Function
-// REPLACE THIS URL with your actual Netlify site URL
 const CLOUD_FUNCTION_URL = "https://slumbernaut.netlify.app/.netlify/functions/gemini";
 
 // Call Gemini API via Netlify Function
@@ -31,7 +30,6 @@ async function callGemini(prompt) {
   }
 }
 
-// Generate personalized sleep analysis
 async function analyzeSleepWithAI(logs) {
   if (logs.length === 0) {
     return "you haven't logged any sleep yet! start tracking to get personalized ai insights. 🌙";
@@ -73,7 +71,6 @@ keep it under 150 words. be supportive and use emojis sparingly. write in lowerc
   return await callGemini(prompt);
 }
 
-// Chat with AI about sleep
 async function chatWithSleepAI(userMessage, logs) {
   const hasData = logs.length > 0;
 
@@ -94,7 +91,6 @@ provide a helpful, concise response (2-3 sentences max). be encouraging and prac
   return await callGemini(prompt);
 }
 
-// Quick sleep tips
 async function getQuickTip() {
   const prompt = `give one quick, actionable sleep tip in 1-2 sentences. be casual, use lowercase, and make it practical. vary your tips between sleep hygiene, bedroom environment, routines, and lifestyle factors.`;
 
