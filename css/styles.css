@@ -121,7 +121,6 @@ h1 {
     z-index: 1;
 }
 
-<<<<<<< HEAD
 /* Header */
 header {
     text-align: center;
@@ -147,9 +146,6 @@ h1 {
 }
 
 /* Navigation */
-=======
-/* Navigation - Inside Header */
->>>>>>> 9e584af8504d402d1a58b91849522ff5bbf21379
 nav {
     display: flex;
     gap: 10px;
