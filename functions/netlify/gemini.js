@@ -1,18 +1,28 @@
 exports.handler = async (event) => {
-  // Add CORS headers
+  // CORS headers - allow all origins
   const headers = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "Content-Type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Content-Type": "application/json",
   };
 
-  // Handle preflight request
+  // Handle preflight OPTIONS request
   if (event.httpMethod === "OPTIONS") {
-    return {statusCode: 200, headers, body: ""};
+    return {
+      statusCode: 200,
+      headers,
+      body: "",
+    };
   }
 
+  // Only allow POST requests
   if (event.httpMethod !== "POST") {
-    return {statusCode: 405, headers, body: "Method Not Allowed"};
+    return {
+      statusCode: 405,
+      headers,
+      body: JSON.stringify({error: "Method Not Allowed"}),
+    };
   }
 
   const {prompt} = JSON.parse(event.body);
